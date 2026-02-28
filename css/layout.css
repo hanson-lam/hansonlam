@@ -34,12 +34,21 @@
    Hero / Home section — fully centered
    -------------------------------------------------------------------------- */
 
+/* Override .section padding for the home section — the hero handles its own vertical spacing */
+#home.section {
+    padding: 0;
+}
+
 .hero {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     text-align: center;
-    padding: var(--space-12) 0 var(--space-10);
+    /* Fill the viewport below the nav so only the hero is visible on load */
+    min-height: calc(100vh - var(--nav-height));   /* fallback (older Safari) */
+    min-height: calc(100svh - var(--nav-height));  /* svh excludes mobile browser UI bars */
+    padding: var(--space-8) 0;
 }
 
 .hero__name {

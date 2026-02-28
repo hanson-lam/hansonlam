@@ -1,0 +1,274 @@
+/* ==========================================================================
+   layout.css — Page Layout, Sections, Grid, Responsive Breakpoints
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Page wrapper
+   -------------------------------------------------------------------------- */
+
+.page {
+    padding-top: var(--nav-height);
+    overflow-x: hidden;
+    /* prevent horizontal scroll on mobile */
+}
+
+/* --------------------------------------------------------------------------
+   Container — centered, max-width
+   -------------------------------------------------------------------------- */
+
+.container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 var(--space-6);
+}
+
+/* --------------------------------------------------------------------------
+   Section base
+   -------------------------------------------------------------------------- */
+
+.section {
+    padding: var(--space-12) 0;
+}
+
+/* --------------------------------------------------------------------------
+   Hero / Home section — fully centered
+   -------------------------------------------------------------------------- */
+
+.hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--space-12) 0 var(--space-10);
+}
+
+.hero__name {
+    font-size: var(--text-4xl);
+    font-weight: var(--weight-bold);
+    letter-spacing: -0.02em;
+    line-height: var(--leading-tight);
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-4);
+}
+
+.hero__tagline {
+    font-size: var(--text-md);
+    font-weight: var(--weight-regular);
+    color: var(--color-text-secondary);
+    letter-spacing: 0.01em;
+    min-height: 1.6em;
+    /* prevents layout shift during typing */
+}
+
+.hero__socials {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-6);
+    margin-top: var(--space-7);
+}
+
+.hero__social-link {
+    display: inline-flex;
+    align-items: center;
+    /* Increase tap target for touch devices */
+    padding: var(--space-2);
+    margin: calc(-1 * var(--space-2));
+    color: var(--color-text-secondary);
+    transition: color var(--duration-fast) var(--ease-out);
+}
+
+.hero__social-link:hover {
+    color: var(--color-text-primary);
+}
+
+/* --------------------------------------------------------------------------
+   Section heading — large, centered, monospace
+   -------------------------------------------------------------------------- */
+
+.section__heading {
+    font-size: var(--text-3xl);
+    font-weight: var(--weight-bold);
+    letter-spacing: -0.02em;
+    line-height: var(--leading-tight);
+    color: var(--color-text-primary);
+    text-align: center;
+    margin-bottom: var(--space-8);
+}
+
+/* --------------------------------------------------------------------------
+   About section
+   -------------------------------------------------------------------------- */
+
+.about__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    max-width: 680px;
+    margin: 0 auto;
+}
+
+.about__body p {
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-secondary);
+}
+
+/* --------------------------------------------------------------------------
+   About avatar
+   -------------------------------------------------------------------------- */
+
+.about__avatar {
+    display: flex;
+    justify-content: center;
+    margin-bottom: var(--space-6);
+}
+
+.about__avatar-img {
+    /* Scales smoothly: 120px on small phones → 168px on desktop.
+       clamp(min, preferred, max) — preferred = 25vw hits 168px at ~672px viewport */
+    width: clamp(120px, 25vw, 168px);
+    height: clamp(120px, 25vw, 168px);
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center top;
+    /* favour face over body */
+    border: 1px solid var(--color-border);
+    /* Fallback background while image loads or if file is missing */
+    background-color: var(--color-border-subtle);
+    /* Subtle desaturation to complement the monochrome aesthetic */
+    filter: grayscale(15%);
+    display: block;
+}
+
+/* --------------------------------------------------------------------------
+   Skills grid — 2 columns
+   -------------------------------------------------------------------------- */
+
+.skills-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+}
+
+/* --------------------------------------------------------------------------
+   Projects grid — 2 columns
+   -------------------------------------------------------------------------- */
+
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+}
+
+/* --------------------------------------------------------------------------
+   Responsive Breakpoints
+
+   1024px  — large tablet / small laptop (iPad Pro landscape)
+    768px  — tablet portrait (iPad)
+    640px  — large phone (nav becomes hamburger)
+    480px  — standard phone (iPhone 14, Pixel)
+    375px  — small phone (iPhone SE, iPhone 13 mini)
+   -------------------------------------------------------------------------- */
+
+/* Large tablet & smaller laptop: slight padding reduction */
+@media (max-width: 1024px) {
+    .container {
+        padding: 0 var(--space-6);
+    }
+}
+
+/* Tablet portrait: keep 2-col grid but reduce type + spacing slightly */
+@media (max-width: 768px) {
+    .hero__name {
+        font-size: var(--text-3xl);
+        /* 56px → still big but not oversized */
+    }
+
+    .section__heading {
+        font-size: var(--text-2xl);
+        /* 56px → 40px */
+        margin-bottom: var(--space-6);
+    }
+
+    .section {
+        padding: var(--space-10) 0;
+        /* 120px → 80px */
+    }
+
+    .hero {
+        padding: var(--space-10) 0 var(--space-8);
+    }
+}
+
+/* Large phone / small tablet: collapse grids to 1 column */
+@media (max-width: 640px) {
+
+    .skills-grid,
+    .projects-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero__name {
+        font-size: var(--text-2xl);
+        /* 56px → 40px */
+    }
+
+    .section__heading {
+        font-size: var(--text-xl);
+        /* 40px → 28px */
+    }
+
+    .section {
+        padding: var(--space-9) 0;
+        /* 80px → 64px */
+    }
+}
+
+/* Standard phone: reduce container padding and section spacing */
+@media (max-width: 480px) {
+    .container {
+        padding: 0 var(--space-5);
+        /* 32px → 24px side padding */
+    }
+
+    .hero__name {
+        font-size: var(--text-xl);
+        /* 40px → 28px */
+        letter-spacing: -0.01em;
+    }
+
+    .hero__tagline {
+        font-size: var(--text-base);
+    }
+
+    .hero {
+        padding: var(--space-8) 0 var(--space-7);
+    }
+
+    .section {
+        padding: var(--space-8) 0;
+        /* 64px → 48px */
+    }
+
+    .section__heading {
+        margin-bottom: var(--space-5);
+    }
+
+    .scroll-cue {
+        margin-top: var(--space-6);
+    }
+}
+
+/* Smallest phones (iPhone SE: 375px, iPhone 13 mini: 375px) */
+@media (max-width: 390px) {
+    .container {
+        padding: 0 var(--space-4);
+        /* 24px → 16px */
+    }
+
+    .hero__name {
+        font-size: var(--text-lg);
+        /* 28px → 22px — fits name on one line */
+    }
+}

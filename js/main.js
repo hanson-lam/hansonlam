@@ -13,7 +13,7 @@
     /* --------------------------------------------------------------------------
        Scroll-reveal: fade + slide up on enter viewport (animate once)
 
-       - [data-reveal]         → single element, animates immediately
+       - [data-reveal]         → single element, re-animates on every viewport entry
        - [data-reveal-stagger] → children animate row-by-row, detected via
                                  offsetTop so it works at any column count
                                  and with any number of children.
@@ -21,6 +21,15 @@
     const HEADING_DELAY = 0;    // ms: heading starts immediately
     const STAGGER_BASE = 250;  // ms: first row starts after heading
     const STAGGER_STEP = 200;  // ms: each subsequent row adds this
+
+    // Track scroll direction so stagger can reverse when scrolling up
+    let lastScrollY = window.scrollY;
+    let scrollDirection = 'down';
+    window.addEventListener('scroll', () => {
+        const y = window.scrollY;
+        scrollDirection = y > lastScrollY ? 'down' : 'up';
+        lastScrollY = y;
+    }, { passive: true });
 
     /**
      * Group elements by their vertical row position (offsetTop).
@@ -46,10 +55,13 @@
         return rows;
     }
 
-    function applyStaggerDelays(container) {
+    function applyStaggerDelays(container, reversed = false) {
         const rows = getRows(container.children);
+        const lastIndex = rows.length - 1;
         rows.forEach((row, rowIndex) => {
-            const delay = STAGGER_BASE + rowIndex * STAGGER_STEP;
+            // When reversed (scrolling up), bottom row gets shortest delay
+            const effectiveIndex = reversed ? (lastIndex - rowIndex) : rowIndex;
+            const delay = STAGGER_BASE + effectiveIndex * STAGGER_STEP;
             row.forEach((el) => {
                 el.style.transitionDelay = `${delay}ms`;
             });
@@ -62,13 +74,22 @@
         const revealObserver = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
+                    const el = entry.target;
                     if (entry.isIntersecting) {
-                        const el = entry.target;
+                        // Element entered viewport — apply delays (if stagger) then reveal
                         if (el.hasAttribute('data-reveal-stagger')) {
-                            applyStaggerDelays(el);
+                            applyStaggerDelays(el, scrollDirection === 'up');
                         }
                         el.classList.add('is-visible');
-                        revealObserver.unobserve(el);
+                    } else {
+                        // Element left viewport — reset so it can animate again
+                        el.classList.remove('is-visible');
+                        if (el.hasAttribute('data-reveal-stagger')) {
+                            // Clear stagger delays so re-entry starts cleanly
+                            Array.from(el.children).forEach((child) => {
+                                child.style.transitionDelay = '';
+                            });
+                        }
                     }
                 });
             },
@@ -198,9 +219,10 @@
             'AI Enthusiast',
             'Avid Boba Drinker',
             'Future Founder :)',
-            'Reluctant Runner',
-            'Building New Things',
-            'Yogi'
+            'Aspiring Runner',
+            'Responsible Vibe Coder',
+            'Yogi',
+            'Curious Traveler'
         ];
 
         let phraseIndex = 0;

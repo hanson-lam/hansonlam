@@ -11,14 +11,13 @@
     'use strict';
 
     /* --------------------------------------------------------------------------
-       Scroll-reveal: fade + slide up on enter viewport (animate once)
+       Scroll-reveal: fade + slide, re-animates on every viewport entry
 
        - [data-reveal]         → single element, re-animates on every viewport entry
        - [data-reveal-stagger] → children animate row-by-row, detected via
                                  offsetTop so it works at any column count
                                  and with any number of children.
        -------------------------------------------------------------------------- */
-    const HEADING_DELAY = 0;    // ms: heading starts immediately
     const STAGGER_BASE = 250;  // ms: first row starts after heading
     const STAGGER_STEP = 200;  // ms: each subsequent row adds this
 
@@ -76,16 +75,27 @@
                 entries.forEach((entry) => {
                     const el = entry.target;
                     if (entry.isIntersecting) {
-                        // Element entered viewport — apply delays (if stagger) then reveal
+                        const isUp = scrollDirection === 'up';
+
+                        // Step 1 (sync): set the starting position and stagger delays.
+                        // --reveal-dir drives the CSS translateY start value via calc().
+                        // We must NOT add is-visible yet — the browser needs one frame to
+                        // render the start position so it has a "from" state to animate from.
+                        el.style.setProperty('--reveal-dir', isUp ? '-1' : '1');
                         if (el.hasAttribute('data-reveal-stagger')) {
-                            applyStaggerDelays(el, scrollDirection === 'up');
+                            applyStaggerDelays(el, isUp);
                         }
-                        el.classList.add('is-visible');
+
+                        // Step 2 (next frame): add is-visible to trigger the transition.
+                        requestAnimationFrame(() => {
+                            el.classList.add('is-visible');
+                        });
                     } else {
-                        // Element left viewport — reset so it can animate again
+                        // Exit: instantly snap back to hidden (transitions are on .is-visible,
+                        // so removing it causes no animated exit — just a clean reset).
                         el.classList.remove('is-visible');
+                        el.style.removeProperty('--reveal-dir');
                         if (el.hasAttribute('data-reveal-stagger')) {
-                            // Clear stagger delays so re-entry starts cleanly
                             Array.from(el.children).forEach((child) => {
                                 child.style.transitionDelay = '';
                             });
@@ -95,6 +105,7 @@
             },
             { threshold: 0.1 }
         );
+
         revealEls.forEach((el) => revealObserver.observe(el));
     }
 
@@ -189,14 +200,8 @@
             try {
                 await navigator.clipboard.writeText(email);
             } catch {
-                // Fallback for older browsers / iOS < 13.4
-                const ta = document.createElement('textarea');
-                ta.value = email;
-                ta.style.cssText = 'position:fixed;opacity:0;pointer-events:none';
-                document.body.appendChild(ta);
-                ta.select();
-                document.execCommand('copy');
-                document.body.removeChild(ta);
+                // Clipboard API unavailable — fail silently
+                console.warn('Could not copy email: Clipboard API not available');
             }
 
             // Show tooltip
